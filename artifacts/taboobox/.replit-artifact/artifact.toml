@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "TABOOBOX"
+description = "The original TABOOBOX bilingual video community and administrator control center, preserved from the supplied source and completed with secure moderation and provider workflows."
+version = "1.0.0"
+id = "artifacts/taboobox"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22956
+
+[services.development]
+run = "pnpm --filter @workspace/taboobox run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/taboobox", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/taboobox/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22956"
+BASE_PATH = "/"
