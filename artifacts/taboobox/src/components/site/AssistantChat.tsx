@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Send, Trash2, CloudOff, Loader2, RefreshCw } from "lucide-react";
+import { Send, Trash2, CloudOff, Loader2, RefreshCw, Skull } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { Conversation, ConversationContent, ConversationScrollButton, ConversationEmptyState } from "@/components/ai-elements/conversation";
@@ -11,11 +11,10 @@ import { Shimmer } from "@/components/ai-elements/shimmer";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 import { getAssistantConversation, saveAssistantMessage, clearAssistantConversation } from "@/lib/assistant.functions";
-import logo from "@/assets/logo-skull.png.asset.json";
 
 export function AssistantEmpty() {
   const { lang } = useI18n();
-  return <div className="flex min-h-[360px] flex-col items-center justify-center gap-3 px-5 text-center lg:min-h-[600px]"><img src={logo.url} alt="" className="size-16 object-contain" /><h2 className="font-display text-xl font-bold uppercase">TABOOBOX {lang === "ar" ? "المساعد" : "Assistant"}</h2><p className="text-sm text-muted-foreground">{lang === "ar" ? "اختر محادثة أو أنشئ محادثة جديدة." : "Select a conversation or start a new chat."}</p><span className="mt-2 flex items-center gap-2 text-xs text-muted-foreground"><CloudOff className="size-4" />{lang === "ar" ? "المحرك غير متصل" : "AI engine not connected"}</span></div>;
+  return <div className="flex min-h-[360px] flex-col items-center justify-center gap-3 px-5 text-center lg:min-h-[600px]"><Skull aria-hidden="true" className="size-16 text-primary" /><h2 className="font-display text-xl font-bold uppercase">TABOOBOX {lang === "ar" ? "المساعد" : "Assistant"}</h2><p className="text-sm text-muted-foreground">{lang === "ar" ? "اختر محادثة أو أنشئ محادثة جديدة." : "Select a conversation or start a new chat."}</p><span className="mt-2 flex items-center gap-2 text-xs text-muted-foreground"><CloudOff className="size-4" />{lang === "ar" ? "المحرك غير متصل" : "AI engine not connected"}</span></div>;
 }
 
 export function AssistantChat({ threadId }: { threadId: string }) {
@@ -62,7 +61,7 @@ export function AssistantChat({ threadId }: { threadId: string }) {
     <Conversation className="min-h-0"><ConversationContent className="gap-5 p-3 sm:p-4">
       {conversation.isPending && <div className="flex justify-center p-8"><Loader2 className="size-5 animate-spin text-muted-foreground" /></div>}
       {conversation.isError && <div role="alert" className="text-center text-sm text-destructive">{ar ? "تعذر تحميل هذه المحادثة." : "Could not load this conversation."}<Button variant="ghost" size="sm" onClick={() => conversation.refetch()}><RefreshCw />{ar ? "إعادة المحاولة" : "Retry"}</Button></div>}
-      {conversation.isSuccess && !conversation.data.messages.length && !pending && <ConversationEmptyState title="" description=""><img src={logo.url} alt="" className="size-12 object-contain" /><h3 className="font-display text-lg uppercase">{ar ? "محادثة جديدة" : "New conversation"}</h3><p className="text-xs text-muted-foreground">{ar ? "المحرك وCloudFam غير متصلين." : "AI engine and CloudFam are not connected."}</p></ConversationEmptyState>}
+      {conversation.isSuccess && !conversation.data.messages.length && !pending && <ConversationEmptyState title="" description=""><Skull aria-hidden="true" className="size-12 text-primary" /><h3 className="font-display text-lg uppercase">{ar ? "محادثة جديدة" : "New conversation"}</h3><p className="text-xs text-muted-foreground">{ar ? "المحرك وCloudFam غير متصلين." : "AI engine and CloudFam are not connected."}</p></ConversationEmptyState>}
       {conversation.data?.messages.map((m) => <Message key={m.id} from={m.role === "assistant" ? "assistant" : "user"}>
         <MessageContent className="group-[.is-user]:bg-secondary group-[.is-user]:text-secondary-foreground"><div dir="auto" className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{m.parts.map((part, i) => m.role === "assistant" ? <MessageResponse key={i}>{part.text}</MessageResponse> : <span key={i}>{part.text}</span>)}</div></MessageContent>
         <time dateTime={m.created_at} className="text-end text-[11px] text-muted-foreground">{new Date(m.created_at).toLocaleString(ar ? "ar" : "en", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</time>

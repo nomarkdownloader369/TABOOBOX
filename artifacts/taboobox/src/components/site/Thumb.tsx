@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from "@/assets/logo-skull.png.asset.json";
+import { Skull } from "lucide-react";
 import { detectCollage } from "@/lib/collage-detect";
 
 /**
@@ -25,17 +25,23 @@ export function Thumb({ src, alt, className = "" }: { src: string; embed: string
   const fit = fill ? "object-cover" : "object-contain";
   const bg = fill ? "bg-surface-2" : "bg-black";
   return (
-    <img
-      src={usable ? src : logo.url}
-      alt={alt}
-      loading="lazy"
-      referrerPolicy="no-referrer"
-      onLoad={(e) => {
-        const img = e.currentTarget;
-        setPortrait(img.naturalHeight > img.naturalWidth);
-      }}
-      onError={() => { if (usable) setFailedSrc(src); }}
-      className={`h-full w-full ${bg} ${fit} ${usable ? "" : "p-8"} ${className}`}
-    />
+    <div role={usable ? undefined : "img"} aria-label={usable ? undefined : alt} className={`relative flex h-full w-full items-center justify-center ${bg} ${className}`}>
+      {usable ? (
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          onLoad={(e) => {
+            const img = e.currentTarget;
+            setPortrait(img.naturalHeight > img.naturalWidth);
+          }}
+          onError={() => setFailedSrc(src)}
+          className={`h-full w-full ${bg} ${fit}`}
+        />
+      ) : (
+        <Skull aria-hidden="true" className="size-10 text-muted-foreground/70" />
+      )}
+    </div>
   );
 }
