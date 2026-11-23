@@ -1,0 +1,405 @@
+TABOOBOX — COMPLETE ORIGINAL PROJECT BUILD & FUNCTIONAL IMPLEMENTATION
+
+YOUR MISSION
+
+I will provide you with the original TABOOBOX project folder.
+
+This folder contains the original website, its design, components, pages, assets, and existing functionality.
+
+Your job is to take this exact original project and turn it into a complete, fully functional, production-ready application.
+
+You MUST build upon the original source code.
+
+You are NOT allowed to create a different website, replace the design, or rebuild the frontend from scratch.
+
+The original project folder is the single source of truth.
+
+1. PRESERVE THE ORIGINAL PROJECT AND DESIGN
+
+This is one of the most important requirements.
+
+Preserve the existing:
+
+- TABOOBOX branding and logo.
+- Black, white, and red color palette.
+- Pirate identity and visual elements.
+- Typography and visual hierarchy.
+- Homepage layout.
+- Navigation and category structure.
+- Video cards and thumbnails.
+- Trending slider.
+- Video player pages.
+- Administrator dashboard.
+- AI Assistant interface.
+- Arabic and English language layouts.
+- Mobile and desktop layouts.
+- Existing animations and interactions.
+
+Do not redesign the website.
+
+Do not replace existing pages with generic templates.
+
+Do not remove components simply because you prefer another implementation.
+
+Do not unnecessarily change spacing, dimensions, image proportions, colors, typography, or navigation.
+
+If a component needs modification to become functional, modify its underlying logic while preserving its existing appearance.
+
+The final result must visually match the original project.
+
+2. INSPECT THE ENTIRE ORIGINAL FOLDER
+
+Before changing anything:
+
+- Read and understand the complete project structure.
+- Inspect all source files and components.
+- Identify every existing page and feature.
+- Inspect existing frontend and backend code.
+- Identify the existing database and authentication system.
+- Inspect dependencies and environment configuration.
+- Identify all unfinished, simulated, and nonfunctional features.
+
+Create a feature inventory.
+
+Classify each feature as:
+
+1. Already working.
+2. Partially working.
+3. Frontend only.
+4. Requires backend implementation.
+5. Requires external API integration.
+
+Do not duplicate features that already work.
+
+3. MAKE THE ENTIRE WEBSITE FUNCTIONAL
+
+Do not stop at creating visual interfaces.
+
+Every visible button, form, menu, action, and interactive element must perform its intended function.
+
+Implement real functionality for:
+
+- Homepage and video navigation.
+- Search and category filtering.
+- Video details and player.
+- User registration and login.
+- Administrator authentication.
+- Video management.
+- Private messaging.
+- Administrator replies.
+- Video reporting and moderation.
+- Video approval.
+- Language switching.
+- Arabic RTL and English LTR.
+- Persistent data storage.
+
+If an existing feature is already working, preserve it and verify it.
+
+Never leave fake buttons or pretend success messages.
+
+4. BUILD THE REAL BACKEND
+
+Inspect the existing architecture before selecting technologies.
+
+Implement the backend required to make the application work.
+
+Requirements:
+
+- Secure server-side API.
+- Persistent database.
+- Authentication and authorization.
+- Administrator-only endpoints.
+- Data validation.
+- Error handling.
+- Persistent messaging.
+- Persistent video records and metadata.
+- Reports and moderation records.
+- AI conversation storage.
+- Task history.
+- Integration records.
+- Audit logs.
+
+Reuse the existing database where practical.
+
+If migration is necessary, preserve existing data and create backups first.
+
+Do not perform destructive migrations without approval.
+
+5. BUILD THE REAL AI ASSISTANT
+
+Use the existing TABOOBOX AI Assistant interface.
+
+Do not create a second assistant.
+
+Turn the existing interface into a real intelligent administrator assistant.
+
+It must support:
+
+- Natural-language instructions.
+- Persistent separate conversations.
+- Conversation history.
+- Understanding administrator commands.
+- Authorized backend tool execution.
+- Real task status and progress.
+- Execution logs.
+- Error reporting.
+- Confirmation before sensitive operations.
+
+Create a modular architecture so the AI provider can be changed later.
+
+Investigate free and open-source AI providers first.
+
+Prefer options that minimize operating costs, while clearly explaining usage limits and infrastructure requirements.
+
+Do not pretend the AI can execute an action unless the backend actually performs it.
+
+6. CLOUDFAM API INTEGRATION
+
+I already have a CloudFam API key.
+
+Use the official CloudFam API documentation to determine the actual supported capabilities.
+
+Implement a secure server-side integration.
+
+Requirements:
+
+- Store credentials in Replit Secrets.
+- Never expose API keys in frontend code.
+- Never commit secrets to GitHub.
+- Never print complete credentials in logs.
+- Test the actual API connection.
+- Retrieve supported video records and metadata.
+- Synchronize available video information.
+- Detect new available records where supported.
+- Record synchronization results.
+- Display real connection status and errors.
+
+Never invent endpoints or undocumented API capabilities.
+
+Do not bypass authentication or service restrictions.
+
+7. BUILD THE VIDEO ASSISTANT
+
+Create a real workflow for preparing individual videos.
+
+For each video:
+
+1. Retrieve available source information.
+2. Read its actual metadata.
+3. Prepare an improved English title and description.
+4. Prepare Arabic title and description.
+5. Suggest relevant categories and tags.
+6. Display available thumbnail and video details.
+7. Allow administrator editing.
+8. Save the prepared metadata.
+9. Add the video to the approval queue.
+
+Do not invent duration, resolution, view counts, or other source data.
+
+8. INDIVIDUAL VIDEO APPROVAL AND PUBLISHING
+
+Implement a real publishing approval workflow.
+
+Each video must be processed individually.
+
+Possible statuses:
+
+- Discovered.
+- Processing.
+- Metadata Ready.
+- Awaiting Approval.
+- Approved.
+- Rejected.
+- Published.
+- Failed.
+
+The administrator must be able to:
+
+- Review each video.
+- Edit metadata.
+- Approve or reject it.
+- See its publishing status.
+- Review its operation history.
+
+No video may be published without explicit individual administrator approval.
+
+Only implement publishing through documented, authorized methods.
+
+Record every publishing operation and its result.
+
+9. AUTOMATION CENTER
+
+Implement real automation rather than decorative controls.
+
+Where supported, provide:
+
+- Scheduled CloudFam synchronization.
+- Detection of newly available videos.
+- Metadata preparation workflows.
+- Task queues.
+- Retry handling.
+- Enable and disable controls.
+- Execution logs.
+- Error notifications.
+- Pending approval notifications.
+
+Never bypass the administrator's individual publishing approval.
+
+Do not show a scheduler as active unless a real backend scheduler is running.
+
+10. ADMINISTRATOR CONTROL CENTER
+
+Preserve the original dashboard design and complete its functionality.
+
+Ensure the existing dashboard supports:
+
+- Overview and statistics.
+- Video management.
+- AI Assistant.
+- Automation Center.
+- CloudFam integration.
+- Video approval queue.
+- Private messages and administrator replies.
+- Reports and moderation.
+- Task history.
+- System health.
+- Audit logs.
+
+Keep all administrator functionality private.
+
+11. SECURITY AND LEGAL REQUIREMENTS
+
+Implement:
+
+- Server-side authorization.
+- Protected administrator routes.
+- Secure session handling.
+- Input validation.
+- Rate limiting where appropriate.
+- Secure secrets management.
+- Private messaging permissions.
+- Report moderation.
+- Audit logs.
+- Protection against unauthorized publishing.
+
+Support only lawful content involving consenting adults, with appropriate age and consent verification, and respect all rights and moderation requirements.
+
+Do not bypass access controls or platform restrictions.
+
+12. TEST EVERYTHING
+
+Do not consider the project complete merely because it builds successfully.
+
+Run real tests for:
+
+- Website startup.
+- Production build.
+- Authentication.
+- Administrator permissions.
+- Database persistence.
+- Homepage.
+- Search and categories.
+- Video pages and player.
+- Private messaging.
+- Administrator replies.
+- Video reports.
+- Arabic RTL.
+- English LTR.
+- AI conversations.
+- Real backend tool execution.
+- CloudFam API connection.
+- Metadata synchronization.
+- Individual approval.
+- Publishing authorization.
+- Automation scheduling.
+- Mobile responsiveness.
+- Error handling.
+
+Verify actual behavior, not just the presence of components.
+
+Clearly report any functionality that cannot be tested because external credentials or services are unavailable.
+
+13. RESPONSIVE DESIGN
+
+Preserve the original appearance on mobile and desktop.
+
+Fix functional layout issues without redesigning the interface.
+
+Verify:
+
+- Navigation.
+- Menus.
+- Chat interface.
+- Dashboard.
+- Video grids.
+- Modals.
+- Forms.
+- RTL and LTR layouts.
+- Scrolling and touch interactions.
+
+14. PRODUCTION READINESS
+
+Prepare the application for deployment.
+
+Verify:
+
+- Production build.
+- Environment variables.
+- Database persistence.
+- Secure API configuration.
+- Error monitoring.
+- Backups and recovery.
+- Deployment configuration.
+
+Do not publish the application publicly or perform irreversible production operations without approval.
+
+15. EXECUTION RULES
+
+Work systematically through the entire project.
+
+Do not perform a superficial audit and stop.
+
+Do not merely tell me what needs to be built.
+
+Actually implement the missing functionality, test it, and fix problems.
+
+Use the following development cycle:
+
+1. Inspect.
+2. Plan.
+3. Implement.
+4. Test.
+5. Fix.
+6. Verify.
+7. Document.
+
+Preserve all working code and original design.
+
+If you encounter a destructive operation, an unexpected data migration, a paid service requirement, missing external credentials, or undocumented API behavior, stop that specific operation and request approval.
+
+Continue with other safe work where possible.
+
+Do not repeatedly ask for information already available in the project.
+
+FINAL ACCEPTANCE CRITERIA
+
+TABOOBOX is complete only when:
+
+- The original design has been preserved.
+- The original project runs correctly.
+- Existing features continue working.
+- Backend functionality is real.
+- Data persists correctly.
+- Administrator permissions are secure.
+- AI Assistant executes authorized tools.
+- CloudFam integration works according to its actual API.
+- Video metadata preparation works.
+- Every video requires individual approval before publication.
+- Automation performs real scheduled operations.
+- Arabic and English work correctly.
+- Mobile and desktop layouts work.
+- Critical tests pass.
+
+Your objective is to deliver the original TABOOBOX project as a real, fully functional application, not a visual prototype.
+
+START BY INSPECTING THE ORIGINAL PROJECT FOLDER, THEN IMPLEMENT THE COMPLETE SYSTEM WHILE PRESERVING ITS DESIGN.
