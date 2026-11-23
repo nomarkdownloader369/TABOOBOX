@@ -1,0 +1,17 @@
+# Roadmap
+- [ ] Upgrade existing Assistant: conversation search/rename/delete, task history, automation drafts, CloudFam status and shared individual video approvals
+- [ ] Verify Control Center admin access, saved history, confirmation gates and desktop/mobile RTL/LTR
+- [x] Apply TABOOBOX branding, Arabic-first RTL/LTR, direct login, interaction feedback and trending badge changes
+- [x] Add secure video reports and administrative review with durable activity
+- [x] Add private guest/member contact conversations, replies and unread counts
+- [x] Verify guest message → admin reply → guest readback, duplicate validation, permissions, language persistence and Arabic admin layouts
+- [ ] Verify report submission/review/removal with existing video content (blocked: catalog is empty; no fake videos or reports created)
+- [x] Add admin-only AI Assistant threads, Cloud history, disconnected integration interface and automation dashboard; verify access and mobile layout
+- [ ] Remove extra collage zoom and verify original video quality detection
+- [x] Migrate source app, Cloud schema, email + Google sign-in
+- [x] High-quality logo + favicon
+- [x] Trending flame: change direction, place next to "Now"
+- [x] Redesign control panel (dashboard, manage, AI publishing) for mobile + desktop
+- [x] Verify all pages without errors
+- [ ] Import existing videos and users (waiting for exports)
+- [x] Verify signed-in admin navigation and contact replies; report actions await existing videos

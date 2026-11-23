@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1795052765634,
+      "tag": "0000_videos_roles_identities",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795052778271,
+      "tag": "0001_admin_assistant_history",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795053561999,
+      "tag": "0002_visitor_support_inboxes",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795153319669,
+      "tag": "0003_atomic_contact_creation",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795293074186,
+      "tag": "0004_support_inbox_preview_and_audit_boundary",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795293127998,
+      "tag": "0005_least_privilege_visitor_support",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795328867069,
+      "tag": "0006_assistant_control_center",
+      "breakpoints": true
+    }
+  ]
+}
