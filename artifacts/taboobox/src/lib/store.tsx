@@ -13,6 +13,7 @@ import { type CategoryId, type QualitySource, type Video, type VideoQuality } fr
 interface StoreCtx {
   videos: Video[];
   published: Video[];
+  catalogLoadState: "loading" | "ready" | "error";
   favorites: string[];
   toggleFavorite: (id: string) => void;
   updateVideo: (id: string, patch: Partial<Video>) => void;
@@ -61,21 +62,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [dbLoaded, setDbLoaded] = useState(false);
+  const [catalogLoadState, setCatalogLoadState] = useState<"loading" | "ready" | "error">("loading");
 
   const load = useCallback(async () => {
     if (gate.current.isWriting()) return;
+    setCatalogLoadState("loading");
     const request = gate.current.begin();
     const rows: Row[] = [];
     for (let offset = 0; ; offset += 1000) {
       const { data, error } = await supabase.from("videos").select("*").order("created_at", { ascending: false }).order("id").range(offset, offset + 999);
       if (!gate.current.isCurrent(request)) return;
-      if (error || !data) { setDbLoaded(true); return; }
+      if (error || !data) { setDbLoaded(true); setCatalogLoadState("error"); return; }
       rows.push(...data);
       if (data.length < 1000) break;
     }
     if (!gate.current.isCurrent(request)) return;
     const catalog = rows.map(fromRow);
-    setDbVideos(catalog); setDbLoaded(true);
+    setDbVideos(catalog); setDbLoaded(true); setCatalogLoadState("ready");
     // Refresh existing unknown records too; only real file measurements produce badges.
     const noDuration = (d: string) => !d || d === "0:00";
     const unresolved = catalog.filter((v) => (!v.quality || noDuration(v.duration)) && cloudfamEmbedId(v.embedUrl));
@@ -133,6 +136,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     <Ctx.Provider value={{
       videos,
       published: videos.filter((v) => v.status === "published"),
+      catalogLoadState,
       favorites,
       toggleFavorite: (id) => setFavorites((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id])),
       updateVideo: (id, patch) => {

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useStore } from "@/lib/store";
 import { CATEGORIES, type Video, type CategoryId } from "@/lib/videos";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { TestVideoLab } from "@/components/admin/TestVideoLab";
 
 export const Route = createFileRoute("/admin/videos")({
   head: () => ({ meta: [
@@ -23,7 +24,7 @@ const field = "h-10 w-full rounded-md border bg-background px-3 text-sm outline-
 function Manage() {
   const { lang } = useI18n(); const ar = lang === "ar";
   const tr = (value: string) => ar ? adminCopy[value] ?? value : value;
-  const { videos, updateVideo, deleteVideo } = useStore();
+  const { videos, catalogLoadState, updateVideo, deleteVideo } = useStore();
   const [editing, setEditing] = useState<Video | null>(null);
   const [toDelete, setToDelete] = useState<Video | null>(null);
   const [q, setQ] = useState("");
@@ -31,7 +32,9 @@ function Manage() {
 
   return (
     <div className="space-y-4">
-      <div className="panel flex flex-wrap items-center justify-between gap-3 p-5"><h2 className="font-display text-2xl font-bold uppercase">{tr("Manage videos")} <span className="text-sm text-muted-foreground">{list.length}</span></h2><Button asChild variant="ai"><Link to="/admin/publish"><Plus />{tr("Add videos")}</Link></Button></div>
+      <div className="panel flex flex-wrap items-center justify-between gap-3 p-5"><div><h2 className="font-display text-2xl font-bold uppercase">{tr("Manage videos")} <span className="text-sm text-muted-foreground">{catalogLoadState === "ready" ? list.length : "—"}</span></h2><p className="mt-1 text-xs text-muted-foreground">{ar ? "سجلات مباشرة من أرشيف Supabase" : "Live records from the Supabase archive"}</p></div><Button asChild variant="ai"><Link to="/admin/publish"><Plus />{tr("Add videos")}</Link></Button></div>
+      {catalogLoadState === "loading" && <p role="status" className="text-sm text-muted-foreground">{ar ? "جارٍ تحميل أرشيف Supabase…" : "Loading the Supabase archive…"}</p>}
+      {catalogLoadState === "error" && <p role="alert" className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">{ar ? "تعذر تحميل أرشيف Supabase؛ لم يتم اعتبار الخطأ أرشيفًا فارغًا." : "Could not load the Supabase archive. This error is not being presented as an empty archive."}</p>}
       <div className="relative"><Search className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" /><input aria-label="Search videos" value={q} onChange={(e) => setQ(e.target.value)} placeholder={ar ? "ابحث عن فيديو…" : "Search videos…"} className={`${field} ps-9`} /></div>
       <ul className="panel divide-y overflow-hidden">
         {list.map((v) => (
@@ -55,7 +58,8 @@ function Manage() {
           </li>
         ))}
       </ul>
-      {!list.length && <p className="py-8 text-center text-sm text-muted-foreground">{ar ? "لا توجد فيديوهات." : "No videos found."}</p>}
+      {!list.length && catalogLoadState === "ready" && <p className="py-8 text-center text-sm text-muted-foreground">{ar ? "لا توجد فيديوهات في الأرشيف المباشر." : "No matching videos in the live archive."}</p>}
+      <TestVideoLab />
 
       {editing && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-overlay md:items-center">

@@ -6,7 +6,7 @@
 
 @theme inline {
   --font-sans: "Barlow", system-ui, sans-serif;
-  --font-display: "Oswald", "Barlow", sans-serif;
+  --font-display: "Oswald", "Cairo", "Barlow", sans-serif;
   --font-arabic: "Cairo", sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

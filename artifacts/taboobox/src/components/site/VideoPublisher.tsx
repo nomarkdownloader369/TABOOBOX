@@ -191,7 +191,7 @@ export function VideoPublisher({ controlCenter = false }: { controlCenter?: bool
       <header className="panel flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between md:p-5">
         <div>
           <h2 className="font-display text-2xl font-bold uppercase tracking-wide">{controlCenter ? (ar ? "مركز اعتماد الفيديوهات" : "Video approval center") : tr("AI video publishing")}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{tr("Paste links, let AI write titles, descriptions and tags in English and Arabic, then publish.")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{ar ? "الصق الروابط لإنشاء بيانات وصفية قابلة للمراجعة. لا يتم النشر إلا بعد الموافقة والتأكيد." : "Import links, generate reviewable metadata with AI, then publish only after individual approval and confirmation."}</p>
         </div>
         <ol className="flex items-center gap-2 text-xs font-semibold" aria-label="Publishing steps">
           {steps.map((s, i) => (

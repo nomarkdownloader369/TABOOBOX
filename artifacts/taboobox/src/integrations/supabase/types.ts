@@ -468,6 +468,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      assistant_save_reply: {
+        Args: { p_thread_id: string; p_text: string }
+        Returns: { id: string; created_at: string }[]
+      }
       assistant_save_automation: {
         Args: {
           p_command: string
