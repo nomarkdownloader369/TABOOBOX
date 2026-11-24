@@ -487,6 +487,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      record_video_approval: {
+        Args: { p_confirmed: boolean; p_video_data: Json; p_video_id: string }
+        Returns: undefined
+      }
+      publish_approved_video: {
+        Args: { p_confirmed: boolean; p_video_data: Json; p_video_id: string }
+        Returns: undefined
+      }
       support_admin_read: { Args: { p_id: string }; Returns: undefined }
       support_create_contact: {
         Args: {

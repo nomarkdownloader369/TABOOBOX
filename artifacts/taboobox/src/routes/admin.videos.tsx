@@ -41,9 +41,15 @@ function Manage() {
               <p className="truncate text-sm font-semibold">{v.title}</p>
               <p className="text-xs text-muted-foreground">{CATEGORIES.find((c) => c.id === v.category)?.[lang]} · <span className={v.status === "published" ? "text-success" : "text-warning"}>{v.status}</span></p>
             </div>
-            <Button variant="secondary" size="icon" aria-label={v.status === "published" ? "Unpublish" : "Publish"} title={v.status === "published" ? "Unpublish" : "Publish"} onClick={() => updateVideo(v.id, { status: v.status === "published" ? "pending" : "published" })}>
-              {v.status === "published" ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </Button>
+            {v.status === "published" ? (
+              <Button variant="secondary" size="icon" aria-label="Unpublish" title="Unpublish" onClick={() => updateVideo(v.id, { status: "pending" })}>
+                <EyeOff className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button variant="secondary" size="icon" disabled aria-label="Individual approval required to publish" title="Individual approval required to publish">
+                <Eye className="h-4 w-4" />
+              </Button>
+            )}
             <Button variant="secondary" size="icon" aria-label="Edit video" title="Edit" onClick={() => setEditing(v)}><Pencil className="h-4 w-4" /></Button>
             <Button variant="ghost" size="icon" aria-label="Delete video" title="Delete" onClick={() => setToDelete(v)} className="text-primary"><Trash2 className="h-4 w-4" /></Button>
           </li>
@@ -67,7 +73,6 @@ function Manage() {
                 {CATEGORIES.slice(1).map((c) => <option key={c.id} value={c.id}>{c[lang]}</option>)}
               </select>
             </label>
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.status === "published"} onChange={(e) => setEditing({ ...editing, status: e.target.checked ? "published" : "pending" })} />{tr("Published")}</label>
             <Button className="h-11 w-full">{tr("Save changes")}</Button>
           </form>
         </div>

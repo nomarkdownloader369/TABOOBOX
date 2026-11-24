@@ -18,6 +18,8 @@ interface StoreCtx {
   updateVideo: (id: string, patch: Partial<Video>) => void;
   deleteVideo: (id: string) => void;
   addVideos: (v: Video[]) => Promise<boolean>;
+  recordVideoApproval: (video: Video) => Promise<boolean>;
+  publishApprovedVideo: (video: Video) => Promise<boolean>;
 }
 const Ctx = createContext<StoreCtx | null>(null);
 
@@ -172,6 +174,39 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return true;
         } catch { toast.error("Could not reach the archive. Your review videos have been kept."); return false; }
         finally { gate.current.finishWrite(); void load(); }
+      },
+      recordVideoApproval: async (video) => {
+        try {
+          const { error } = await supabase.rpc("record_video_approval", {
+            p_video_id: video.id,
+            p_video_data: toRow(video),
+            p_confirmed: true,
+          });
+          if (error) { toast.error(`Approval was not saved: ${error.message}`); return false; }
+          return true;
+        } catch {
+          toast.error("Could not save the approval. Please try again when connected.");
+          return false;
+        }
+      },
+      publishApprovedVideo: async (video) => {
+        gate.current.startWrite();
+        try {
+          const { error } = await supabase.rpc("publish_approved_video", {
+            p_video_id: video.id,
+            p_video_data: toRow(video),
+            p_confirmed: true,
+          });
+          if (error) { toast.error(`Could not publish: ${error.message}`); return false; }
+          toast.success("Video saved to the archive");
+          return true;
+        } catch {
+          toast.error("Could not reach the archive. Your review video has been kept.");
+          return false;
+        } finally {
+          gate.current.finishWrite();
+          void load();
+        }
       },
     }}>{children}</Ctx.Provider>
   );
