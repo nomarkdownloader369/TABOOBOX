@@ -468,6 +468,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      assistant_save_reply: {
+        Args: { p_thread_id: string; p_text: string }
+        Returns: { id: string; created_at: string }[]
+      }
       assistant_save_automation: {
         Args: {
           p_command: string
@@ -486,6 +490,14 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      record_video_approval: {
+        Args: { p_confirmed: boolean; p_video_data: Json; p_video_id: string }
+        Returns: undefined
+      }
+      publish_approved_video: {
+        Args: { p_confirmed: boolean; p_video_data: Json; p_video_id: string }
+        Returns: undefined
       }
       support_admin_read: { Args: { p_id: string }; Returns: undefined }
       support_create_contact: {

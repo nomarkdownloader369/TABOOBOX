@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useStore } from "@/lib/store";
 import { CATEGORIES, type Video, type CategoryId } from "@/lib/videos";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { TestVideoLab } from "@/components/admin/TestVideoLab";
 
 export const Route = createFileRoute("/admin/videos")({
   head: () => ({ meta: [
@@ -23,7 +24,7 @@ const field = "h-10 w-full rounded-md border bg-background px-3 text-sm outline-
 function Manage() {
   const { lang } = useI18n(); const ar = lang === "ar";
   const tr = (value: string) => ar ? adminCopy[value] ?? value : value;
-  const { videos, updateVideo, deleteVideo } = useStore();
+  const { videos, catalogLoadState, updateVideo, deleteVideo } = useStore();
   const [editing, setEditing] = useState<Video | null>(null);
   const [toDelete, setToDelete] = useState<Video | null>(null);
   const [q, setQ] = useState("");
@@ -31,7 +32,9 @@ function Manage() {
 
   return (
     <div className="space-y-4">
-      <div className="panel flex flex-wrap items-center justify-between gap-3 p-5"><h2 className="font-display text-2xl font-bold uppercase">{tr("Manage videos")} <span className="text-sm text-muted-foreground">{list.length}</span></h2><Button asChild variant="ai"><Link to="/admin/publish"><Plus />{tr("Add videos")}</Link></Button></div>
+      <div className="panel flex flex-wrap items-center justify-between gap-3 p-5"><div><h2 className="font-display text-2xl font-bold uppercase">{tr("Manage videos")} <span className="text-sm text-muted-foreground">{catalogLoadState === "ready" ? list.length : "—"}</span></h2><p className="mt-1 text-xs text-muted-foreground">{ar ? "سجلات مباشرة من أرشيف Supabase" : "Live records from the Supabase archive"}</p></div><Button asChild variant="ai"><Link to="/admin/publish"><Plus />{tr("Add videos")}</Link></Button></div>
+      {catalogLoadState === "loading" && <p role="status" className="text-sm text-muted-foreground">{ar ? "جارٍ تحميل أرشيف Supabase…" : "Loading the Supabase archive…"}</p>}
+      {catalogLoadState === "error" && <p role="alert" className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">{ar ? "تعذر تحميل أرشيف Supabase؛ لم يتم اعتبار الخطأ أرشيفًا فارغًا." : "Could not load the Supabase archive. This error is not being presented as an empty archive."}</p>}
       <div className="relative"><Search className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" /><input aria-label="Search videos" value={q} onChange={(e) => setQ(e.target.value)} placeholder={ar ? "ابحث عن فيديو…" : "Search videos…"} className={`${field} ps-9`} /></div>
       <ul className="panel divide-y overflow-hidden">
         {list.map((v) => (
@@ -41,15 +44,22 @@ function Manage() {
               <p className="truncate text-sm font-semibold">{v.title}</p>
               <p className="text-xs text-muted-foreground">{CATEGORIES.find((c) => c.id === v.category)?.[lang]} · <span className={v.status === "published" ? "text-success" : "text-warning"}>{v.status}</span></p>
             </div>
-            <Button variant="secondary" size="icon" aria-label={v.status === "published" ? "Unpublish" : "Publish"} title={v.status === "published" ? "Unpublish" : "Publish"} onClick={() => updateVideo(v.id, { status: v.status === "published" ? "pending" : "published" })}>
-              {v.status === "published" ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </Button>
+            {v.status === "published" ? (
+              <Button variant="secondary" size="icon" aria-label="Unpublish" title="Unpublish" onClick={() => updateVideo(v.id, { status: "pending" })}>
+                <EyeOff className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button variant="secondary" size="icon" disabled aria-label="Individual approval required to publish" title="Individual approval required to publish">
+                <Eye className="h-4 w-4" />
+              </Button>
+            )}
             <Button variant="secondary" size="icon" aria-label="Edit video" title="Edit" onClick={() => setEditing(v)}><Pencil className="h-4 w-4" /></Button>
             <Button variant="ghost" size="icon" aria-label="Delete video" title="Delete" onClick={() => setToDelete(v)} className="text-primary"><Trash2 className="h-4 w-4" /></Button>
           </li>
         ))}
       </ul>
-      {!list.length && <p className="py-8 text-center text-sm text-muted-foreground">{ar ? "لا توجد فيديوهات." : "No videos found."}</p>}
+      {!list.length && catalogLoadState === "ready" && <p className="py-8 text-center text-sm text-muted-foreground">{ar ? "لا توجد فيديوهات في الأرشيف المباشر." : "No matching videos in the live archive."}</p>}
+      <TestVideoLab />
 
       {editing && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-overlay md:items-center">
@@ -67,7 +77,6 @@ function Manage() {
                 {CATEGORIES.slice(1).map((c) => <option key={c.id} value={c.id}>{c[lang]}</option>)}
               </select>
             </label>
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.status === "published"} onChange={(e) => setEditing({ ...editing, status: e.target.checked ? "published" : "pending" })} />{tr("Published")}</label>
             <Button className="h-11 w-full">{tr("Save changes")}</Button>
           </form>
         </div>

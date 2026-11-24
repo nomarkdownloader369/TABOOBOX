@@ -11,24 +11,27 @@ export const Route = createFileRoute("/admin/")({ head: () => ({ meta: [{ title:
 
 function Dashboard() {
   const { lang, t } = useI18n(); const ar = lang === "ar";
-  const { videos } = useStore();
+  const { videos, catalogLoadState } = useStore();
   const recent = [...videos].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 8);
   return (
     <div className="space-y-5">
       <header className="panel flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-display text-2xl font-bold uppercase tracking-wide">{ar ? "نظرة عامة" : "Overview"}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{ar ? "ملخص الأرشيف." : "Your archive at a glance."}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{ar ? "ملخص مباشر لسجلات Supabase. لا تتضمن بيانات الاختبار المحلية." : "Live Supabase archive summary; local test samples are not included."}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="secondary"><Link to="/admin/videos"><Film />{ar ? "إدارة الفيديوهات" : "Manage videos"}</Link></Button>
-          <Button asChild variant="ai"><Link to="/admin/publish"><Sparkles />{ar ? "النشر بالذكاء الاصطناعي" : "Publish with AI"}</Link></Button>
+          <Button asChild variant="ai"><Link to="/admin/publish"><Sparkles />{ar ? "استيراد ومراجعة فيديو" : "Import & review videos"}</Link></Button>
         </div>
       </header>
       <DashboardStats />
       <section className="panel overflow-hidden">
         <div className="flex items-center justify-between border-b p-4"><h2 className="font-display text-lg font-bold uppercase">{ar ? "أضيف مؤخرًا" : "Recently added"}</h2><Link to="/admin/videos" className="text-xs font-semibold text-primary hover:underline">{ar ? "عرض الكل" : "View all"}</Link></div>
-        {!recent.length ? <p className="p-8 text-center text-sm text-muted-foreground">{ar ? "لا توجد فيديوهات بعد." : "No videos yet."}</p> : (
+        {catalogLoadState === "loading" && <p role="status" className="p-8 text-center text-sm text-muted-foreground">{ar ? "جارٍ تحميل سجلات Supabase…" : "Loading live Supabase records…"}</p>}
+        {catalogLoadState === "error" && <p role="alert" className="p-8 text-center text-sm text-destructive">{ar ? "تعذر تحميل سجلات Supabase المباشرة." : "Could not load live Supabase records."}</p>}
+        {catalogLoadState === "ready" && !recent.length && <p className="p-8 text-center text-sm text-muted-foreground">{ar ? "الأرشيف المباشر فارغ حاليًا." : "The live archive is currently empty."}</p>}
+        {recent.length > 0 && (
         <ul className="divide-y">
           {recent.map((v) => (
             <li key={v.id} className="flex items-center gap-3 p-3 transition-colors hover:bg-surface-2/50">

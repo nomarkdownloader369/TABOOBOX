@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import type { AiMetadata } from "@/lib/ai-publisher";
 import { generateVideoMetadata } from "@/lib/ai-publisher.functions";
 import { useStore } from "@/lib/store";
-import { CATEGORIES, qualityLabel, type CategoryId, type VideoQuality } from "@/lib/videos";
+import { CATEGORIES, qualityLabel, type CategoryId, type Video, type VideoQuality } from "@/lib/videos";
 import { qualityFromHeight } from "@/lib/video-quality";
 import { Thumb } from "@/components/site/Thumb";
 import { useServerFn } from "@tanstack/react-start";
@@ -18,7 +18,7 @@ import { getCloudfamThumbnail } from "@/lib/video-import.functions";
 
 
 type Status = "imported" | "analyzing" | "ready" | "approved" | "error";
-interface Item { id: string; embed: string; thumbnail: string; duration: string; quality: VideoQuality | null; status: Status; selected: boolean; meta: AiMetadata; error?: string | undefined }
+interface Item { id: string; embed: string; thumbnail: string; duration: string; quality: VideoQuality | null; status: Status; selected: boolean; meta: AiMetadata; publication?: Video | undefined; error?: string | undefined }
 
 const emptyMeta: AiMetadata = { titleEn: "", titleAr: "", descriptionEn: "", descriptionAr: "", category: "", tags: [] };
 
@@ -31,7 +31,7 @@ const field = "w-full rounded-md border bg-background px-3 py-2 text-sm outline-
 export function VideoPublisher({ controlCenter = false }: { controlCenter?: boolean }) {
   const { lang } = useI18n(); const ar = lang === "ar";
   const tr = (value: string) => ar ? adminCopy[value] ?? value : value;
-  const { addVideos, videos } = useStore();
+  const { recordVideoApproval, publishApprovedVideo, videos } = useStore();
   const lock = useRef(false);
   const [issues, setIssues] = useState<ImportIssue[]>([]);
   const [importedCount, setImportedCount] = useState(0);
@@ -47,19 +47,29 @@ export function VideoPublisher({ controlCenter = false }: { controlCenter?: bool
   // Keep unpublished review cards across refreshes so nothing imported is lost.
   const [restored, setRestored] = useState(false);
   useEffect(() => {
-    try { const saved: unknown = JSON.parse(localStorage.getItem("pxd-review") ?? "[]"); if (Array.isArray(saved)) setItems(saved.map((x: Item) => ({ ...x, status: x.status === "analyzing" ? "imported" : x.status }))); } catch { localStorage.removeItem("pxd-review"); }
+    try { const saved: unknown = JSON.parse(localStorage.getItem("pxd-review") ?? "[]"); if (Array.isArray(saved)) setItems(saved.map((x: Item) => ({ ...x, status: x.status === "analyzing" ? "imported" : x.status === "approved" && !x.publication ? "ready" : x.status }))); } catch { localStorage.removeItem("pxd-review"); }
     setRestored(true);
   }, []);
   useEffect(() => { if (restored) localStorage.setItem("pxd-review", JSON.stringify(items)); }, [items, restored]);
-  const patch = (id: string, p: Partial<Item>) => setItems((xs) => xs.map((x) => (x.id === id ? { ...x, ...p } : x)));
+  const patch = (id: string, p: Partial<Item>) => setItems((xs) => xs.map((x) => (x.id === id ? { ...x, ...p, ...(p.status === "ready" ? { publication: undefined } : {}) } : x)));
   const selected = items.filter((i) => i.selected);
   const busy = importing || publishing || Boolean(progress && progress.done < progress.total);
   const approved = items.filter((i) => i.status === "approved");
   const editMeta = (id: string, meta: AiMetadata) => patch(id, { meta, status: "ready", error: undefined });
-  const approve = (it: Item) => {
+  const approve = async (it: Item) => {
     const error = reviewError(it.meta);
-    if (error) { patch(it.id, { error }); return; }
-    patch(it.id, { status: "approved", error: undefined });
+    if (error) { patch(it.id, { error }); return false; }
+    const publication: Video = {
+      id: `imp-${it.id}`, title: it.meta.titleEn.trim() || it.meta.titleAr.trim(),
+      titleAr: it.meta.titleAr.trim() || it.meta.titleEn.trim(), description: publicationDescription(it.meta),
+      category: publicationCategory(it.meta), thumbnail: it.thumbnail, embedUrl: it.embed,
+      views: 0, likes: 0, duration: it.duration, status: "published", createdAt: new Date().toISOString(),
+      quality: it.quality, qualitySource: it.quality ? "file-metadata" : "unknown",
+    };
+    const saved = await recordVideoApproval(publication);
+    if (!saved) return false;
+    patch(it.id, { status: "approved", publication, error: undefined });
+    return true;
   };
 
   const doImport = async () => {
@@ -137,12 +147,7 @@ export function VideoPublisher({ controlCenter = false }: { controlCenter?: bool
       for (const it of valid) {
         const duplicate = parseBulkEmbeds(it.embed, videos.filter((v) => v.id !== `imp-${it.id}`).map((v) => v.embedUrl));
         if (!duplicate.entries.length) { patch(it.id, { error: "This video is already in the archive." }); continue; }
-        const saved = await addVideos([{
-          id: `imp-${it.id}`, title: it.meta.titleEn.trim() || it.meta.titleAr.trim(), titleAr: it.meta.titleAr.trim() || it.meta.titleEn.trim(),
-          description: publicationDescription(it.meta), category: publicationCategory(it.meta),
-          thumbnail: it.thumbnail, embedUrl: it.embed, quality: it.quality, qualitySource: it.quality ? "file-metadata" : "unknown",
-          views: 0, likes: 0, duration: it.duration, status: "published", createdAt: new Date().toISOString(),
-        }]);
+        const saved = it.publication ? await publishApprovedVideo(it.publication) : false;
         if (saved) { count++; setItems((xs) => xs.filter((x) => x.id !== it.id)); }
         else patch(it.id, { error: "Not published. Your video is still here; retry when connected." });
         setProgress((p) => p ? { ...p, done: p.done + 1 } : p);
@@ -172,7 +177,11 @@ export function VideoPublisher({ controlCenter = false }: { controlCenter?: bool
   const confirmDecision = async () => {
     if (!decision || busy) return;
     const targets = items.filter((it) => decision.ids.includes(it.id));
-    if (decision.kind === "approve") { for (const it of targets) approve(it); }
+    if (decision.kind === "approve") {
+      setPublishing(true);
+      try { for (const it of targets) await approve(it); }
+      finally { setPublishing(false); }
+    }
     if (decision.kind === "reject") setItems((xs) => xs.filter((it) => !decision.ids.includes(it.id)));
     if (decision.kind === "publish") await publish(targets);
     setDecision(null);
@@ -182,7 +191,7 @@ export function VideoPublisher({ controlCenter = false }: { controlCenter?: bool
       <header className="panel flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between md:p-5">
         <div>
           <h2 className="font-display text-2xl font-bold uppercase tracking-wide">{controlCenter ? (ar ? "مركز اعتماد الفيديوهات" : "Video approval center") : tr("AI video publishing")}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{tr("Paste links, let AI write titles, descriptions and tags in English and Arabic, then publish.")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{ar ? "الصق الروابط لإنشاء بيانات وصفية قابلة للمراجعة. لا يتم النشر إلا بعد الموافقة والتأكيد." : "Import links, generate reviewable metadata with AI, then publish only after individual approval and confirmation."}</p>
         </div>
         <ol className="flex items-center gap-2 text-xs font-semibold" aria-label="Publishing steps">
           {steps.map((s, i) => (
@@ -272,7 +281,7 @@ export function VideoPublisher({ controlCenter = false }: { controlCenter?: bool
       )}
 
       <AlertDialog open={Boolean(decision)} onOpenChange={(open) => { if (!open && !busy) setDecision(null); }}>
-        <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{decision?.kind === "approve" ? (ar ? "اعتماد هذا الفيديو؟" : "Approve this video?") : decision?.kind === "reject" ? (ar ? "رفض هذا الفيديو؟" : "Reject this video?") : (ar ? "نشر الفيديوهات المعتمدة؟" : "Publish approved videos?")}</AlertDialogTitle><AlertDialogDescription>{decision?.kind === "publish" ? (ar ? "سيتم نشر الفيديوهات المعتمدة فقط. لن يظهر نجاح حتى يؤكد الأرشيف الحفظ." : "Only individually approved videos will be published. Success requires archive confirmation.") : decision?.kind === "reject" ? (ar ? "سيُحذف من قائمة المراجعة في هذا المتصفح فقط، وليس من المصدر." : "Remove from this browser's review queue only, not from the source.") : (ar ? "اعتماد فردي في قائمة هذا المتصفح؛ لا يتم النشر الآن." : "Save individual approval in this browser's review queue. Nothing is published yet.")}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel disabled={busy}>{ar ? "إلغاء" : "Cancel"}</AlertDialogCancel><AlertDialogAction disabled={busy} onClick={(e) => { e.preventDefault(); void confirmDecision(); }}>{busy ? <Loader2 className="animate-spin" /> : <Send />}{ar ? "تأكيد" : "Confirm"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+        <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{decision?.kind === "approve" ? (ar ? "اعتماد هذا الفيديو؟" : "Approve this video?") : decision?.kind === "reject" ? (ar ? "رفض هذا الفيديو؟" : "Reject this video?") : (ar ? "نشر الفيديوهات المعتمدة؟" : "Publish approved videos?")}</AlertDialogTitle><AlertDialogDescription>{decision?.kind === "publish" ? (ar ? "سيتم نشر الفيديوهات المعتمدة فقط. لن يظهر نجاح حتى يؤكد الأرشيف الحفظ." : "Only individually approved videos will be published. Success requires archive confirmation.") : decision?.kind === "reject" ? (ar ? "سيُحذف من قائمة المراجعة في هذا المتصفح فقط، وليس من المصدر." : "Remove from this browser's review queue only, not from the source.") : (ar ? "يُحفظ هذا الاعتماد الفردي في قاعدة بيانات الأرشيف. لن يُنشر الفيديو حتى تؤكد النشر." : "Save this individual approval to the archive database. Nothing is published until you confirm publishing.")}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel disabled={busy}>{ar ? "إلغاء" : "Cancel"}</AlertDialogCancel><AlertDialogAction disabled={busy} onClick={(e) => { e.preventDefault(); void confirmDecision(); }}>{busy ? <Loader2 className="animate-spin" /> : <Send />}{ar ? "تأكيد" : "Confirm"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
       </AlertDialog>
       {editing && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-overlay md:items-center">
